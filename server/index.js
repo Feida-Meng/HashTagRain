@@ -24,6 +24,10 @@ var T = new Twit({
   timeout_ms:           60*1000  // optional HTTP request timeout to apply to all requests.
 });
 
+app.get('/',(res,rep) => {
+  rep.sendFile(publicPath + 'views/index.html');
+});
+
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
