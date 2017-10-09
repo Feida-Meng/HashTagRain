@@ -32,6 +32,7 @@ app.get('/',(res,rep) => {
   rep.sendFile(publicPath + 'views/index.html');
 });
 
+var rawFilter = {};
 var filter = {};
 var currentUserHashtag;
 var stream;
@@ -111,8 +112,6 @@ io.on('connection',(socket) => {
     if (adminFilterInput[0].follow) {
       try {
         const resp = await  T.get('users/lookup',{ screen_name: adminFilterInput[0].follow });
-        console.log(resp.data);
-
         //send warning back
         if ( resp.data.errors ) {
           throw `User ${adminFilterInput[0].follow} cannot be found!`;
@@ -168,9 +167,65 @@ io.on('connection',(socket) => {
       }
     //-----------------------------------------------------------------------------------------------
 
+    //--------------add new or delete or overwrite current filter-------------------------------------
+
+      //adminFilterInput[1] contains the type of operation admin would like to do
+      //location value is managed differently from others, i.e.username and hashtag
+      //for twitter Streaming, filter is set as the following pattern
+      //{
+      // track:[hashtag1,2....],
+      // username:[twitterID1,ID2..],
+      // location:[-79.63, 43.40, -78.90, 43.85, 115.42, 39.43, 117.50, 41.05]
+      //}
+      //for locatiton property, the each location contains four GPS coordinates,
+      //and each of those four numbers are not supposed to be contained in their
+      //own array
+
+      if (adminFilterInput[1] === 'overwrite') {
+        rawFilter = {};
+        filter = {};
+      }
 
 
+      for(let key in adminFilterInput[0]) {
+        switch (adminFilterInput[1]) {
 
+          case 'addNew':
+            rawFilter[key] ? rawFilter[key].push(adminFilterInput[0][key]) : rawFilter[key] = [adminFilterInput[0][key]];
+            if (key === 'location') {
+              filter[key] ? filterInput[key].forEach(elem => filter[key].push(elem)) : filter[key] = filterInput[key];
+            } else {
+              filter[key] ? filter[key].push(filterInput[key]) : filter[key] = [filterInput[key]];
+            }
+            break;
+
+          case 'delete':
+            if (rawFilter[key]) {
+              rawFilter[key] = rawFilter[key].filter(elem => elem !== adminFilterInput[0][key]);
+            }
+            if (filter[key]) {
+              if (key === 'location') {
+                for (let i = 0; i < filterInput[key].length; i++) {
+                  filter[key] = filter[key].filter(elem => elem !== filterInput[key][i]);
+                }
+              } else {
+                filter[key] = filter[key].filter(elem => elem !== filterInput[key]);
+              }
+            }
+            break;
+
+          default:
+            rawFilter[key] = [adminFilterInput[0][key]]
+            filter[key] = (key === 'location' ? filterInput[key] : [filterInput[key]] );
+        }
+      }
+     //---------------------------------------------------------------------------------------------------
+
+     //if there is currently a streaming for fetching twitter,
+     //start new streaming after admin updates the filter
+     if (stream) {
+       fetchAndPostTwit();
+     }
 
 
 
