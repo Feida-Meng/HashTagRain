@@ -107,7 +107,7 @@ io.on('connection',(socket) => {
     //which is more readable than GPS coordinates and a long twitter userId
     const filterInput = {...adminFilterInput[0]};
 
-  //--if admin input contains username, convert it to twitter id ----------------------------
+    //---------------if admin input contains username, convert it to twitter id ----------------------------
     if (adminFilterInput[0].follow) {
       try {
         const resp = await  T.get('users/lookup',{ screen_name: adminFilterInput[0].follow });
@@ -117,17 +117,56 @@ io.on('connection',(socket) => {
         if ( resp.data.errors ) {
           throw `User ${adminFilterInput[0].follow} cannot be found!`;
         }
-
+        //adminFilterInput[0].follow is not updated, since
+        //its raw value e.g. @twitter_user_name other than 92323422412342
+        //will be send back to admin page
+        //to display the most updated filter settings
         filterInput.follow = resp.data[0].id_str;
+
       } catch(warning) {
         socket.emit('warning', warning);
         console.log(warning);
+        //delete submitted but not available filter parameters from filter changes
         delete filterInput.follow;
         delete adminFilterInput[0].follow;
       }
     }
-  //--------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------
 
+    //---------------Convert location to boundingBox for straming API to search-----------------------------------
+      if (adminFilterInput[0].location) {
+        try {
+
+          const response = await T.get('geo/search', {query: adminFilterInput[0].location, "granularity": "neighborhood"});
+          const locationList = response.data.result.places;
+
+          if (locationList === undefined || locationList == 0) {
+            throw `Location, ${adminFilterInput[0].location} cannot be found!`;
+          }
+
+          //find the boundingBox
+          const geoInfo = response.data.result.places[0].bounding_box.coordinates[0];
+          const lng = geoInfo.map(elem => elem[0]);
+          const lat = geoInfo.map(elem => elem[1]);
+          const maxLng = lng.reduce((a, b) => Math.max(a, b));
+          const minLng = lng.reduce((a, b) => Math.min(a, b));
+          const maxLat = lat.reduce((a, b) => Math.max(a, b));
+          const minLat = lat.reduce((a, b) => Math.min(a, b));
+
+          //adminFilterInput[0].location is not updated, since
+          //its raw value e.g. toronto will be send back to admin page
+          //to display the most updated filter settings
+          filterInput.location = [minLng, minLat, maxLng, maxLat];
+
+        } catch(warning) {
+          console.log(warning);
+          socket.emit('warning', warning);
+          //delete submitted but not available filter parameters from filter changes
+          delete filterInput.location;
+          delete adminFilterInput[0].location;
+        }
+      }
+    //-----------------------------------------------------------------------------------------------
 
 
 
