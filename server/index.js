@@ -28,6 +28,33 @@ app.get('/',(res,rep) => {
   rep.sendFile(publicPath + 'views/index.html');
 });
 
+var filter = {};
+var currentUserHashtag;
+
+
+
+//---------------io listens on new socket connected on the client side ---------------------
+io.on('connection',(socket) => {
+  var userId;
+
+
+  socket.on('searchHashtag', (newHashtag) => {
+    userId = socket.id;
+    //Sanitize the user input
+    newHashtag = newHashtag.trim();
+    newHashtag = newHashtag.charAt(0) === '#' ? newHashtag : `#${newHashtag}`;
+
+    //update the filter, user other than admin cannot add the location and username
+    //therefore, hashtag can be saved to filter directly
+    if (currentUserHashtag) {
+      filter.track[filter.track.indexOf(currentUserHashtag)] = newHashtag;
+    } else {
+      filter['track'] ? filter['track'].push(newHashtag) : filter['track'] = [newHashtag];
+    }
+
+  });
+});
+
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
