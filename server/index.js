@@ -30,14 +30,47 @@ app.get('/',(res,rep) => {
 
 var filter = {};
 var currentUserHashtag;
-
+var stream;
 
 
 //---------------io listens on new socket connected on the client side ---------------------
 io.on('connection',(socket) => {
+
+  console.log(`New user connected, ${Date.now()}`);
+
   var userId;
 
+  const fetchAndPostTwit = () => {
 
+    // stop current streaming (if there is one) to update the filter
+    if (stream) {
+      stream.stop();
+    }
+
+    //start a streaming with a filter
+    console.log('filter:',filter)
+    stream = T.stream('statuses/filter', filter);
+
+    //listen on new tweet
+    stream.on('tweet', (tweet) => {
+      console.log('new tweet, ', filter.track);
+
+      // emit new tweet to front.
+      io.to(userId).emit('newTwt',tweet);
+    });
+
+    //stop the stream when the socket is disconnected
+    if (socket.id !== adminId) {
+      socket.on('disconnect',() => {
+        if (stream) {
+          stream.stop();
+        }
+      });
+    }
+  }
+
+
+  //-----------It listens the event that user submits the hashtag----------------------------
   socket.on('searchHashtag', (newHashtag) => {
     userId = socket.id;
     //Sanitize the user input
@@ -51,6 +84,9 @@ io.on('connection',(socket) => {
     } else {
       filter['track'] ? filter['track'].push(newHashtag) : filter['track'] = [newHashtag];
     }
+    currentUserHashtag = newHashtag;
+    socket.emit('currentUserHashtag', currentUserHashtag);
+    fetchAndPostTwit();
 
   });
 });
