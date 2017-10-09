@@ -16,7 +16,7 @@ app.use(express.static(publicPath));
 
 
 //---------------------setting up keys to use twitter api-------------------------------
-var T = new Twit({
+const T = new Twit({
   consumer_key:         keys.TWITTER_CONSUMER_KEY,
   consumer_secret:      keys.TWITTER_CONSUMER_SECRET,
   access_token:         keys.TWITTER_Access_Token,
@@ -32,10 +32,10 @@ app.get('/',(res,rep) => {
   rep.sendFile(publicPath + 'views/index.html');
 });
 
-var rawFilter = {};
-var filter = {};
-var currentUserHashtag;
-var stream;
+let rawFilter = {};
+let filter = {};
+let currentUserHashtag;
+let stream;
 
 
 //---------------io listens on new socket connected on the client side ---------------------
@@ -43,7 +43,14 @@ io.on('connection',(socket) => {
 
   console.log(`New user connected, ${Date.now()}`);
 
-  var userId;
+  let userId;
+  let adminId;
+
+  const updateCurrentFilterAtAmin = () => {
+    console.log('filter,', filter );
+    console.log('rawFilter,', rawFilter );
+    io.to(adminId).emit('updateCurrentFilterAtAmin', rawFilter );
+  }
 
   const fetchAndPostTwit = () => {
 
@@ -73,6 +80,12 @@ io.on('connection',(socket) => {
       });
     }
   }
+
+  //-------Display the current filter when admin login---------
+  socket.on('I-am-Admin',() => {
+    adminId = socket.id
+    updateCurrentFilterAtAmin();
+  });
 
 
   //-----------listen to the event that user submits the hashtag----------------------------
@@ -186,7 +199,6 @@ io.on('connection',(socket) => {
         filter = {};
       }
 
-
       for(let key in adminFilterInput[0]) {
         switch (adminFilterInput[1]) {
 
@@ -220,14 +232,12 @@ io.on('connection',(socket) => {
         }
       }
      //---------------------------------------------------------------------------------------------------
-
+     updateCurrentFilterAtAmin();
      //if there is currently a streaming for fetching twitter,
      //start new streaming after admin updates the filter
      if (stream) {
        fetchAndPostTwit();
      }
-
-
 
 });
 
