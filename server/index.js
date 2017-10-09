@@ -113,15 +113,15 @@ io.on('connection',(socket) => {
         const resp = await  T.get('users/lookup',{ screen_name: adminFilterInput[0].follow });
         console.log(resp.data);
 
+        //send warning back
         if ( resp.data.errors ) {
-          let warning = `User ${adminFilterInput[0].follow} cannot be found!`;
-          socket.emit('warning', warning);
-          throw warning;
+          throw `User ${adminFilterInput[0].follow} cannot be found!`;
         }
 
         filterInput.follow = resp.data[0].id_str;
-      } catch(e) {
-        console.log(e);
+      } catch(warning) {
+        socket.emit('warning', warning);
+        console.log(warning);
         delete filterInput.follow;
         delete adminFilterInput[0].follow;
       }

@@ -50,3 +50,9 @@ $('#admin-filter-form').on('submit', function(e) {
   $('#admin-filter-form')[0].reset();
 
 });
+
+//pop up warning when search location cannot be found
+socket.on('warning', function(warning){
+  console.log(warning);
+  alert(warning);
+});
