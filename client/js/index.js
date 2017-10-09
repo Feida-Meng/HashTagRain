@@ -1,16 +1,6 @@
 var socket = io();
 
-//search #hashtag
-$('#hashtag-form').on('submit', function(e) {
-  e.preventDefault();
-  var hashtagInputBox = $('#hashtag-input');
-  socket.emit('searchHashtag', hashtagInputBox.val());
-  hashtagInputBox.val('');
-  $('.twit').remove();
-
-});
-
-
+//add new twit
 socket.on('newTwt',function(newTwt) {
   console.log(newTwt);
   var max_twit = 5;
@@ -25,6 +15,16 @@ socket.on('newTwt',function(newTwt) {
   }
 
   $('#twit-list').prepend(twitter);
+
+});
+
+//search #hashtag
+$('#hashtag-form').on('submit', function(e) {
+  e.preventDefault();
+  var hashtagInputBox = $('#hashtag-input');
+  socket.emit('searchHashtag', hashtagInputBox.val());
+  hashtagInputBox.val('');
+  $('.twit').remove();
 
 });
 

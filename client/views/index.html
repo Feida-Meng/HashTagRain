@@ -11,22 +11,20 @@
   </head>
 
   <body>
+    <a href="/admin"> Admin Login </a>
 
-
+    <p id="currentUserHashtag"></p>
 
     <div id="twit-list">
 
     </div>
-    <div class="">
-      <p id="currentUserHashtag"></p>
+
+    <!-- <div class="input-group input-group-lg"> -->
       <form id="hashtag-form" action="/views/index.html" method="post">
         <input id="hashtag-input" name="hashtag" type="text" placeholder=" Type to search hashtag, e.g. 'apple,banana' or 'orange'" autofocus autocomplete="off">
         <button class="submit">Send</button>
       </form>
-
-    </div>
-
-
+    <!-- </div> -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="../js/index.js"></script>

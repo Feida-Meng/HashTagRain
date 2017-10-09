@@ -14,14 +14,9 @@ const io = socketIO(server);
 
 app.use(express.static(publicPath));
 
-
-//---------------------setting up keys to use twitter api-------------------------------
-const T = new Twit({
-  consumer_key:         keys.TWITTER_CONSUMER_KEY,
-  consumer_secret:      keys.TWITTER_CONSUMER_SECRET,
-  access_token:         keys.TWITTER_Access_Token,
-  access_token_secret:  keys.TWITTER_Access_Token_Secret,
-  timeout_ms:           60*1000  // optional HTTP request timeout to apply to all requests.
+//--------------------routing-------------------
+app.get('/adminlogin',(res,rep) => {
+  rep.sendFile(publicPath + 'views/adminLogin.html');
 });
 
 app.get('/admin',(res,rep) => {
@@ -32,25 +27,39 @@ app.get('/',(res,rep) => {
   rep.sendFile(publicPath + 'views/index.html');
 });
 
-let rawFilter = {};
-let filter = {};
-let currentUserHashtag;
-let stream;
 
+//---------------------setting up keys to use twitter api-------------------------------
+var T = new Twit({
+  consumer_key:         keys.TWITTER_CONSUMER_KEY,
+  consumer_secret:      keys.TWITTER_CONSUMER_SECRET,
+  access_token:         keys.TWITTER_Access_Token,
+  access_token_secret:  keys.TWITTER_Access_Token_Secret,
+  timeout_ms:           60*1000  // optional HTTP request timeout to apply to all requests.
+});
+
+//------------------init the filter for fetching twit ----------------------------
+var rawFilter = {};
+var filter = {};
+var stream;
+var currentUserHashtag = null;
 
 //---------------io listens on new socket connected on the client side ---------------------
 io.on('connection',(socket) => {
-
-  console.log(`New user connected, ${Date.now()}`);
-
-  let userId;
-  let adminId;
+  var userId;
+  var adminId;
+  console.log(stream);
 
   const updateCurrentFilterAtAmin = () => {
     console.log('filter,', filter );
     console.log('rawFilter,', rawFilter );
     io.to(adminId).emit('updateCurrentFilterAtAmin', rawFilter );
   }
+
+  //-------Display the current filter when admin login---------
+  socket.on('I-am-Admin',() => {
+    adminId = socket.id
+    updateCurrentFilterAtAmin();
+  });
 
   const fetchAndPostTwit = () => {
 
@@ -79,34 +88,13 @@ io.on('connection',(socket) => {
         }
       });
     }
+
   }
 
-  //-------Display the current filter when admin login---------
-  socket.on('I-am-Admin',() => {
-    adminId = socket.id
-    updateCurrentFilterAtAmin();
-  });
+  console.log(`New user connected, ${Date.now()}`);
 
 
-  //-----------listen to the event that user submits the hashtag----------------------------
-  socket.on('searchHashtag', (newHashtag) => {
-    userId = socket.id;
-    //Sanitize the user input
-    newHashtag = newHashtag.trim();
-    newHashtag = newHashtag.charAt(0) === '#' ? newHashtag : `#${newHashtag}`;
 
-    //update the filter, user other than admin cannot add the location and username
-    //therefore, hashtag can be saved to filter directly
-    if (currentUserHashtag) {
-      filter.track[filter.track.indexOf(currentUserHashtag)] = newHashtag;
-    } else {
-      filter['track'] ? filter['track'].push(newHashtag) : filter['track'] = [newHashtag];
-    }
-    currentUserHashtag = newHashtag;
-    socket.emit('currentUserHashtag', currentUserHashtag);
-    fetchAndPostTwit();
-
-  });
 
   // listen to filter changes made by admin
   socket.on('adminFilterInput', async (adminFilterInput) => {
@@ -121,10 +109,12 @@ io.on('connection',(socket) => {
     //which is more readable than GPS coordinates and a long twitter userId
     const filterInput = {...adminFilterInput[0]};
 
-    //---------------if admin input contains username, convert it to twitter id ----------------------------
+    //-----if admin input username, convert it to twitter id for Streaming API to search--------------
     if (adminFilterInput[0].follow) {
       try {
         const resp = await  T.get('users/lookup',{ screen_name: adminFilterInput[0].follow });
+        console.log(resp.data);
+
         //send warning back
         if ( resp.data.errors ) {
           throw `User ${adminFilterInput[0].follow} cannot be found!`;
@@ -134,7 +124,6 @@ io.on('connection',(socket) => {
         //will be send back to admin page
         //to display the most updated filter settings
         filterInput.follow = resp.data[0].id_str;
-
       } catch(warning) {
         socket.emit('warning', warning);
         console.log(warning);
@@ -145,101 +134,126 @@ io.on('connection',(socket) => {
     }
     //--------------------------------------------------------------------------------------------------------
 
-    //---------------Convert location to boundingBox for straming API to search-----------------------------------
-      if (adminFilterInput[0].location) {
-        try {
+  //-----------Convert location to boundingBox for straming API to search-----------------------------------
+  if (adminFilterInput[0].location) {
+    try {
 
-          const response = await T.get('geo/search', {query: adminFilterInput[0].location, "granularity": "neighborhood"});
-          const locationList = response.data.result.places;
+      const response = await T.get('geo/search', {query: adminFilterInput[0].location, "granularity": "neighborhood"});
+      const locationList = response.data.result.places;
 
-          if (locationList === undefined || locationList == 0) {
-            throw `Location, ${adminFilterInput[0].location} cannot be found!`;
+      if (locationList === undefined || locationList == 0) {
+        throw `Location, ${adminFilterInput[0].location} cannot be found!`;
+      }
+
+      //find the boundingBox
+      const geoInfo = response.data.result.places[0].bounding_box.coordinates[0];
+      const lng = geoInfo.map(elem => elem[0]);
+      const lat = geoInfo.map(elem => elem[1]);
+      const maxLng = lng.reduce((a, b) => Math.max(a, b));
+      const minLng = lng.reduce((a, b) => Math.min(a, b));
+      const maxLat = lat.reduce((a, b) => Math.max(a, b));
+      const minLat = lat.reduce((a, b) => Math.min(a, b));
+
+      //adminFilterInput[0].location is not updated, since
+      //its raw value e.g. toronto will be send back to admin page
+      //to display the most updated filter settings
+      filterInput.location = [minLng, minLat, maxLng, maxLat];
+
+    } catch(warning) {
+      console.log(warning);
+      socket.emit('warning', warning);
+      //delete submitted but not available filter parameters from filter changes
+      delete filterInput.location;
+      delete adminFilterInput[0].location;
+    }
+  }
+  //-----------------------------------------------------------------------------------------------
+    console.log('filterInput2',filterInput);
+
+
+  //--------------add new or delete or overwrite current filter-------------------------------------
+
+    //adminFilterInput[1] contains the type of operation admin would like to do
+    //location value is managed differently from others, i.e.username and hashtag
+    //for twitter Streaming, filter is set as the following pattern
+    //{
+    // track:[hashtag1,2....],
+    // username:[twitterID1,ID2..],
+    // location:[-79.63, 43.40, -78.90, 43.85, 115.42, 39.43, 117.50, 41.05]
+    //}
+    //for locatiton property, the each location contains four GPS coordinates,
+    //and each of those four numbers are not supposed to be contained in their
+    //own array
+
+    if (adminFilterInput[1] === 'overwrite') {
+      rawFilter = {};
+      filter = {};
+    }
+
+    for(let key in adminFilterInput[0]) {
+      switch (adminFilterInput[1]) {
+
+        case 'addNew':
+          rawFilter[key] ? rawFilter[key].push(adminFilterInput[0][key]) : rawFilter[key] = [adminFilterInput[0][key]];
+          if (key === 'location') {
+            filter[key] ? filterInput[key].forEach(elem => filter[key].push(elem)) : filter[key] = filterInput[key];
+          } else {
+            filter[key] ? filter[key].push(filterInput[key]) : filter[key] = [filterInput[key]];
           }
+          break;
 
-          //find the boundingBox
-          const geoInfo = response.data.result.places[0].bounding_box.coordinates[0];
-          const lng = geoInfo.map(elem => elem[0]);
-          const lat = geoInfo.map(elem => elem[1]);
-          const maxLng = lng.reduce((a, b) => Math.max(a, b));
-          const minLng = lng.reduce((a, b) => Math.min(a, b));
-          const maxLat = lat.reduce((a, b) => Math.max(a, b));
-          const minLat = lat.reduce((a, b) => Math.min(a, b));
-
-          //adminFilterInput[0].location is not updated, since
-          //its raw value e.g. toronto will be send back to admin page
-          //to display the most updated filter settings
-          filterInput.location = [minLng, minLat, maxLng, maxLat];
-
-        } catch(warning) {
-          console.log(warning);
-          socket.emit('warning', warning);
-          //delete submitted but not available filter parameters from filter changes
-          delete filterInput.location;
-          delete adminFilterInput[0].location;
-        }
-      }
-    //-----------------------------------------------------------------------------------------------
-
-    //--------------add new or delete or overwrite current filter-------------------------------------
-
-      //adminFilterInput[1] contains the type of operation admin would like to do
-      //location value is managed differently from others, i.e.username and hashtag
-      //for twitter Streaming, filter is set as the following pattern
-      //{
-      // track:[hashtag1,2....],
-      // username:[twitterID1,ID2..],
-      // location:[-79.63, 43.40, -78.90, 43.85, 115.42, 39.43, 117.50, 41.05]
-      //}
-      //for locatiton property, the each location contains four GPS coordinates,
-      //and each of those four numbers are not supposed to be contained in their
-      //own array
-
-      if (adminFilterInput[1] === 'overwrite') {
-        rawFilter = {};
-        filter = {};
-      }
-
-      for(let key in adminFilterInput[0]) {
-        switch (adminFilterInput[1]) {
-
-          case 'addNew':
-            rawFilter[key] ? rawFilter[key].push(adminFilterInput[0][key]) : rawFilter[key] = [adminFilterInput[0][key]];
+        case 'delete':
+          if (rawFilter[key]) {
+            rawFilter[key] = rawFilter[key].filter(elem => elem !== adminFilterInput[0][key]);
+          }
+          if (filter[key]) {
             if (key === 'location') {
-              filter[key] ? filterInput[key].forEach(elem => filter[key].push(elem)) : filter[key] = filterInput[key];
-            } else {
-              filter[key] ? filter[key].push(filterInput[key]) : filter[key] = [filterInput[key]];
-            }
-            break;
-
-          case 'delete':
-            if (rawFilter[key]) {
-              rawFilter[key] = rawFilter[key].filter(elem => elem !== adminFilterInput[0][key]);
-            }
-            if (filter[key]) {
-              if (key === 'location') {
-                for (let i = 0; i < filterInput[key].length; i++) {
-                  filter[key] = filter[key].filter(elem => elem !== filterInput[key][i]);
-                }
-              } else {
-                filter[key] = filter[key].filter(elem => elem !== filterInput[key]);
+              for (let i = 0; i < filterInput[key].length; i++) {
+                filter[key] = filter[key].filter(elem => elem !== filterInput[key][i]);
               }
+            } else {
+              filter[key] = filter[key].filter(elem => elem !== filterInput[key]);
             }
-            break;
+          }
+          break;
 
-          default:
-            rawFilter[key] = [adminFilterInput[0][key]]
-            filter[key] = (key === 'location' ? filterInput[key] : [filterInput[key]] );
-        }
+        default:
+          rawFilter[key] = [adminFilterInput[0][key]]
+          filter[key] = (key === 'location' ? filterInput[key] : [filterInput[key]] );
       }
-     //---------------------------------------------------------------------------------------------------
-     updateCurrentFilterAtAmin();
-     //if there is currently a streaming for fetching twitter,
-     //start new streaming after admin updates the filter
-     if (stream) {
-       fetchAndPostTwit();
-     }
+    }
+   //---------------------------------------------------------------------------------------------------
+
+    updateCurrentFilterAtAmin();
+
+    if (stream) {
+      fetchAndPostTwit();
+    }
+  });
+
+
+//-----------It listens the event that user submits the hashtag----------------------------
+  socket.on('searchHashtag', (newHashtag) => {
+    userId = socket.id;
+    console.log('currentUserHashtag: ', currentUserHashtag);
+    //Sanitize the user input
+    newHashtag = newHashtag.trim();
+    newHashtag = newHashtag.charAt(0) === '#' ? newHashtag : `#${newHashtag}`;
+
+    //update the filter, user other than admin cannot add the location and username
+    //therefore, hashtag can be saved to filter directly
+    if (currentUserHashtag) {
+      filter.track[filter.track.indexOf(currentUserHashtag)] = newHashtag;
+    } else {
+      filter['track'] ? filter['track'].push(newHashtag) : filter['track'] = [newHashtag];
+    }
+    currentUserHashtag = newHashtag;
+    socket.emit('currentUserHashtag', currentUserHashtag);
+    fetchAndPostTwit();
+  });
 
 });
+//--------------------------------------------------------------------------------
 
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
