@@ -27,3 +27,8 @@ socket.on('newTwt',function(newTwt) {
   $('#twit-list').prepend(twitter);
 
 });
+
+//update current hashtag
+socket.on('currentUserHashtag', function(currentHashTag) {
+  $('#currentUserHashtag').html(currentHashTag);
+});
