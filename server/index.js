@@ -64,6 +64,13 @@ io.on('connection',(socket) => {
     updateCurrentFilterAtAmin();
   });
 
+  //-----Stop stopFetchingTwit when user click the stop button------
+  socket.on('stopFetchingTwit', () => {
+    if (stream) {
+      stream.stop();
+    }
+  });
+
   const fetchAndPostTwit = () => {
 
     // stop current streaming (if there is one) to update the filter

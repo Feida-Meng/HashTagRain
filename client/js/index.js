@@ -48,3 +48,8 @@ socket.on('currentUserHashtag', function(currentHashTag) {
 $('#login-submit').click(function(){
   $( "#admin-login-form" ).submit();
 });
+
+//stop fetching twit
+$('#stop-btn').click(function(){
+  socket.emit("stopFetchingTwit");
+});
