@@ -12,41 +12,57 @@
 
   <body>
 
-    <a href="/">Home</a>
 
-    <div class="currentFilter">
-      <p id='filter-title'> </p>
-      <p id='hashtag-filter'> </p>
-      <p id='location-filter'> </p>
-      <p id='username-filter'> </p>
+    <div class="container mb-2">
+      <div class='row d-flex align-items-center justify-content-around bg-light text-danger bg-light w-100 rounded'
+      style="background:transparent url('http://www.clker.com/cliparts/5/H/J/b/u/X/whitecloud-big.svg') no-repeat center center /cover">
+        <a class="navbar-brand " href="/"><h1 class="text-dark">Hashtag Rain</h1></a>
+      </div>
     </div>
 
-    <div>
-      <select id="admin-filter-form-select">
-        <option value="addNew">Add New Twit Search Filter To Current Filter</option>
-        <option value="delete">Delete Twit Search Filter from Current Filter</option>
-        <option value="overwrite">Overwrite Current Twit Search Filter with New Filter</option>
-      </select>
+    <div class="container">
+
+      <a href="/">Home</a>
+      <div class="row d-flex ajustify-content-center text-center">
+
+        </div>
+        <div class="currentFilter">
+          <p id='filter-title'> </p>
+          <p id='hashtag-filter'> </p>
+          <p id='location-filter'> </p>
+          <p id='username-filter'> </p>
+        </div>
+
+        <div>
+          <select class="form-control mb-3 w-50" id="admin-filter-form-select">
+            <option value="addNew">Add New Twit Search Filter To Current Filter</option>
+            <option value="delete">Delete Twit Search Filter from Current Filter</option>
+            <option value="overwrite">Overwrite Current Twit Search Filter with New Filter</option>
+          </select>
+        </div>
+
+        <form id="admin-filter-form" action="/views/admin.html" method="post" formtype="addNew">
+          <div class="filter-input-field form-group w-50">
+            <input class="admin-input form-control" list="delete-track-options" name="track" placeholder=" hashtag " autofocus autocomplete="off">
+            <datalist id="delete-track-options">
+            </datalist>
+          </div>
+          <div class="filter-input-field form-group w-50">
+            <input class="admin-input form-control" list="delete-location-options" name="location" placeholder=" location " >
+            <datalist id="delete-location-options">
+            </datalist>
+          </div>
+          <div class="filter-input-field form-group w-50">
+            <input class="admin-input form-control" list="delete-follow-options" name="follow" placeholder=" user name " >
+            <datalist id="delete-follow-options">
+            </datalist>
+          </div>
+          <button class="btn submit"> Save </button>
+        </form>
     </div>
 
-    <form id="admin-filter-form" action="/views/admin.html" method="post" formtype="addNew">
-      <div class="filter-input-field">
-        <input class="admin-input" list="delete-track-options" name="track" placeholder=" hashtag " autofocus autocomplete="off">
-        <datalist id="delete-track-options">
-        </datalist>
-      </div>
-      <div class="filter-input-field">
-        <input class="admin-input" list="delete-location-options" name="location" placeholder=" location " >
-        <datalist id="delete-location-options">
-        </datalist>
-      </div>
-      <div class="filter-input-field">
-        <input class="admin-input" list="delete-follow-options" name="follow" placeholder=" user name " >
-        <datalist id="delete-follow-options">
-        </datalist>
-      </div>
-      <button class="submit"> Save </button>
-    </form>
+
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="../js/admin.js"></script>

@@ -47,7 +47,6 @@ var currentUserHashtag = null;
 io.on('connection',(socket) => {
   var userId;
   var adminId;
-  console.log(stream);
 
   const updateCurrentFilterAtAmin = () => {
     console.log('filter,', filter );
@@ -168,7 +167,7 @@ io.on('connection',(socket) => {
     }
   }
   //-----------------------------------------------------------------------------------------------
-    console.log('filterInput2',filterInput);
+
 
 
   //--------------add new or delete or overwrite current filter-------------------------------------

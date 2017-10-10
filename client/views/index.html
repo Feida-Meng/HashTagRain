@@ -13,50 +13,51 @@
 
   <body>
     <div class="container">
-      <div class='row d-flex align-items-center justify-content-around bg-light text-danger bg-light w-100 rounded'
-      style="background:transparent url('http://www.clker.com/cliparts/5/H/J/b/u/X/whitecloud-big.svg') no-repeat center center /cover">
-        <a class="navbar-brand " href="/"><h1 class="text-dark">Hashtag Rain</h1></a>
-        <form id="hashtag-form" class='form-inline my-2 my-lg-0' action="/views/index.html" method="post">
-          <input id="hashtag-input" class="rounded form-constrol my-2 my-sm-0 mr-sm-2" name="hashtag" type="text" placeholder="type to search hashtag" autofocus autocomplete="off">
-          <button style="height:auto" class="rounded btn-outline-primary hidden-xs">Start Rain #</button>
-        </form>
-        <button class="rounded btn-primary" data-toggle="modal" data-target="#login"> Admin Login </button>
-      </div>
-    </div>
+        <div class='row d-flex align-items-center justify-content-around bg-light text-danger bg-light rounded mb-2'>
+            <a class="navbar-brand " href="/"><h1 class="text-dark">Hashtag Rain</h1></a>
+            <form id="hashtag-form" class='form-inline my-2 my-lg-0' action="/views/index.html" method="post">
+              <input id="hashtag-input" class="rounded form-constrol my-2 my-sm-0 mr-sm-2" name="hashtag" type="text" placeholder="type to search hashtag" autofocus autocomplete="off">
+              <button style="height:auto" class="rounded btn-outline-primary hidden-xs"> Search #</button>
+            </form>
+            <button class="rounded btn-primary" data-toggle="modal" data-target="#login"> Admin Login </button>
+        </div>
 
 
 
-      <div class="modal" id="login">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <div class="modal-title">
-                Admin Login
+
+
+        <div class="modal" id="login">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <div class="modal-title">
+                  Admin Login
+                </div>
+                <button class="close" data-dismiss="modal"> &times; </button>
               </div>
-              <button class="close" data-dismiss="modal"> &times; </button>
-            </div>
-            <div class="modal-body">
-              <form class="form-group" action="/adminlogin" method="post">
-                <label for="password">Password</label>
-                <input class="form-control" type="password" placeholder="password">
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-success" data-dismiss="modal">Login</button>
-              <button class="btn btn-danger" data-dismiss="modal">Close</button>
+              <div class="modal-body">
+                <form class="form-group" action="/adminlogin" method="post">
+                  <label for="password">Password</label>
+                  <input class="form-control" type="password" placeholder="password">
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-success" data-dismiss="modal">Login</button>
+                <button class="btn btn-danger" data-dismiss="modal">Close</button>
+              </div>
+
             </div>
 
           </div>
+        </div>
+
+          <!-- row justify-content-center align-items-stretch d-flex flex-row -->
+          <div class="row justify-content-center align-items-stretch d-flex flex-row w-95" id="twit-list">
+
+          </div>
+
 
         </div>
-      </div>
-      <p id="currentUserHashtag"></p>
-
-      <div class="container">
-        <div class="row justify-content-center align-items-stretch d-flex flex-row" id="twit-list">
-
-        </div>
-      </div>
       <button id="stop-btn"class="btn-danger text-light float-right">
         Stop
       </button>

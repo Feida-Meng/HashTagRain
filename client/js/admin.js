@@ -5,7 +5,7 @@ socket.emit('I-am-Admin');
 
 socket.on('updateCurrentFilterAtAmin',(currentFilter) => {
   currentFilterSettings = currentFilter;
-  console.log('update!!!!!!!!!!!!!');
+
   console.log(currentFilter);
   //update list of options when formtype is delete
   if ($('#admin-filter-form').attr('formtype') === 'delete') {

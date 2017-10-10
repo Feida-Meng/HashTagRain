@@ -3,18 +3,19 @@ var socket = io();
 //add new twit
 socket.on('newTwt',function(newTwt) {
 
+  console.log(newTwt);
   var width = $(window).width()
   if (width <= 576) {
     max_twit = 3;
   } else if (width <= 768) {
     max_twit = 6;
   } else if (width <= 992) {
-    max_twit = 9;
+    max_twit = 6;
   } else {
     max_twit = 8;
   }
 
-  var card = $('<div></div>').addClass(`card border-info mb-3 col-xm-12 col-sm-6 col-md-4 col-lg-3 bg-info`);
+  var card = $('<div></div>').addClass(`card border-info text-white mb-3 col-xm-12 col-sm-6 col-md-4 col-lg-3 bg-primary`);
   var user = $('<h4></h4>').addClass(`twit-user card-header`).html(newTwt.user.name).appendTo(card);
   var twitter = $('<div></div>').addClass(`twit card-body`).appendTo(card);
   var text = $('<p></p>').addClass(`twit-text`).html(newTwt.text).appendTo(twitter);
