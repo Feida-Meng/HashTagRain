@@ -6,8 +6,9 @@ const Twit = require('twit');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 
-const publicPath = path.join(__dirname, '../client/');
+var { loginCheck } = require('../middleware/login');
 
+const publicPath = path.join(__dirname, '../client/');
 const PORT = process.env.PORT || 5000;
 
 const app = express();
@@ -19,9 +20,10 @@ app.use(express.static(publicPath));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(bodyParser.json());
-//--------------------routing-------------------
-app.post('/adminlogin',(req,res) => {
 
+//--------------------routing-------------------
+app.post('/adminlogin',(loginCheck),(req,res) => {
+  //return admin page if password is correct
   res.sendFile(publicPath + 'views/admin.html');
 });
 
