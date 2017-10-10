@@ -13,7 +13,7 @@ socket.on('updateCurrentFilterAtAmin',(currentFilter) => {
   }
 
   //update the current filter list
-  $('#filter-title').html('Current Filter Settings:');
+  $('#filter-title').html('Current Filter Settings');
   $('#hashtag-filter').html(`Hashtag: ${currentFilter.track ? currentFilter.track : ' '}`);
   $('#location-filter').html(`Location: ${currentFilter.location ? currentFilter.location : ' '}`);
   $('#username-filter').html(`User Name: ${currentFilter.follow ? currentFilter.follow : ' '}`);

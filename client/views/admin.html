@@ -3,6 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./css/stylesheet.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
@@ -12,56 +13,58 @@
 
   <body>
 
-
-    <div class="container mb-2">
-      <div class='row d-flex align-items-center justify-content-around bg-light text-danger bg-light w-100 rounded'
-      style="background:transparent url('http://www.clker.com/cliparts/5/H/J/b/u/X/whitecloud-big.svg') no-repeat center center /cover">
-        <a class="navbar-brand " href="/"><h1 class="text-dark">Hashtag Rain</h1></a>
+    <div class="container">
+    <div class="mb-2">
+      <div class='row d-flex align-items-center justify-content-around bg-light text-danger bg-light w-100 rounded'>
+        <a class="navbar-brand " href="/"><h1 class="text-primary">Hashtag Rain</h1></a>
       </div>
     </div>
 
-    <div class="container">
+    <a href="/">Home</a>
 
-      <a href="/">Home</a>
-      <div class="row d-flex ajustify-content-center text-center">
+      <div class="flex-div">
+        <h1> Hashtag Filter Settings</h1>
+      </div>
 
-        </div>
+      <div class="flex-div text-center">
         <div class="currentFilter">
-          <p id='filter-title'> </p>
+          <h4 id='filter-title'> </h4>
           <p id='hashtag-filter'> </p>
           <p id='location-filter'> </p>
           <p id='username-filter'> </p>
         </div>
+      </div>
 
-        <div>
-          <select class="form-control mb-3 w-50" id="admin-filter-form-select">
-            <option value="addNew">Add New Twit Search Filter To Current Filter</option>
-            <option value="delete">Delete Twit Search Filter from Current Filter</option>
-            <option value="overwrite">Overwrite Current Twit Search Filter with New Filter</option>
-          </select>
+      <div class="flex-div">
+        <select class="form-control mb-3 w-50 text-center" id="admin-filter-form-select">
+          <option value="addNew">Add Parameter To Current Filter</option>
+          <option value="delete">Delete Search Filter Parameter</option>
+          <option value="overwrite">Overwrite Current Search Filter </option>
+        </select>
+      </div>
+
+        <div class="flex-div">
+          <form class="flex-div" id="admin-filter-form" action="/views/admin.html" method="post" formtype="addNew">
+            <div class="filter-input-field form-group w-50">
+              <input class="admin-input form-control" list="delete-track-options" name="track" placeholder=" hashtag ">
+              <datalist id="delete-track-options">
+              </datalist>
+            </div>
+            <div class="filter-input-field form-group w-50">
+              <input class="admin-input form-control" list="delete-location-options" name="location" placeholder=" location " >
+              <datalist id="delete-location-options">
+              </datalist>
+            </div>
+            <div class="filter-input-field form-group w-50">
+              <input class="admin-input form-control" list="delete-follow-options" name="follow" placeholder=" user name " >
+              <datalist id="delete-follow-options">
+              </datalist>
+            </div>
+            <div>
+              <button class="btn submit"> Save </button>
+            </div>
+          </form>
         </div>
-
-        <form id="admin-filter-form" action="/views/admin.html" method="post" formtype="addNew">
-          <div class="filter-input-field form-group w-50">
-            <input class="admin-input form-control" list="delete-track-options" name="track" placeholder=" hashtag " autofocus autocomplete="off">
-            <datalist id="delete-track-options">
-            </datalist>
-          </div>
-          <div class="filter-input-field form-group w-50">
-            <input class="admin-input form-control" list="delete-location-options" name="location" placeholder=" location " >
-            <datalist id="delete-location-options">
-            </datalist>
-          </div>
-          <div class="filter-input-field form-group w-50">
-            <input class="admin-input form-control" list="delete-follow-options" name="follow" placeholder=" user name " >
-            <datalist id="delete-follow-options">
-            </datalist>
-          </div>
-          <button class="btn submit"> Save </button>
-        </form>
-    </div>
-
-
 
 
     <script src="/socket.io/socket.io.js"></script>
