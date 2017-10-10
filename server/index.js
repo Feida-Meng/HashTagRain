@@ -4,6 +4,8 @@ const path = require('path');
 const keys = require('../config/keys');
 const Twit = require('twit');
 const socketIO = require('socket.io');
+const bodyParser = require('body-parser');
+
 const publicPath = path.join(__dirname, '../client/');
 
 const PORT = process.env.PORT || 5000;
@@ -14,17 +16,17 @@ const io = socketIO(server);
 
 app.use(express.static(publicPath));
 
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(bodyParser.json());
 //--------------------routing-------------------
-app.get('/adminlogin',(res,rep) => {
-  rep.sendFile(publicPath + 'views/adminLogin.html');
+app.post('/adminlogin',(req,res) => {
+
+  res.sendFile(publicPath + 'views/admin.html');
 });
 
-app.get('/admin',(res,rep) => {
-  rep.sendFile(publicPath + 'views/admin.html');
-});
-
-app.get('/',(res,rep) => {
-  rep.sendFile(publicPath + 'views/index.html');
+app.get('/',(req,res) => {
+  res.sendFile(publicPath + 'views/index.html');
 });
 
 

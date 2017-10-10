@@ -12,6 +12,8 @@
   "author": "F.Meng",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser-json": "^1.9.2",
     "express": "^4.16.1",
     "socket.io": "^2.0.3",
     "twit": "^2.2.9"

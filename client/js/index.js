@@ -43,3 +43,8 @@ $('#hashtag-form').on('submit', function(e) {
 socket.on('currentUserHashtag', function(currentHashTag) {
   $('#currentUserHashtag').html(currentHashTag);
 });
+
+//Sumbit login password
+$('#login-submit').click(function(){
+  $( "#admin-login-form" ).submit();
+});

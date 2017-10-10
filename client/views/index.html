@@ -32,13 +32,14 @@
               <button class="close" data-dismiss="modal"> &times; </button>
             </div>
             <div class="modal-body">
-              <form class="form-group" action="/adminlogin" method="post">
-                <label for="password">Password</label>
-                <input class="form-control" type="password" placeholder="password">
+              <form class="form-group" id="admin-login-form" action="/adminlogin" method="post">
+                <label for="password-input">Password</label>
+                <input class="form-control" id="password-input" name="password" type="password" placeholder="password">
               </form>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-success" data-dismiss="modal">Login</button>
+
+              <button class="btn btn-success" id="login-submit" data-dismiss="modal">Login</button>
               <button class="btn btn-danger" data-dismiss="modal">Close</button>
             </div>
           </div>
