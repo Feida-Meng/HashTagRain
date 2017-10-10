@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "a ​social​ ​wall​ ​to​ ​display​ ​posts​ ​from​ ​Twitter​ ​using​ ​a ​specific​ ​hashtag​ ​provided ",
   "main": "index.js",
-  "engine": {
-    "node": "8.4.0"
-  },
   "scripts": {
     "start": "node server/index.js"
+  },
+  "engine": {
+    "node": "8.4.0"
   },
   "author": "F.Meng",
   "license": "ISC",
