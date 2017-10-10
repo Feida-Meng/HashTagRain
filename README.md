@@ -1,5 +1,8 @@
 # HashTagRain, a social wall to display posts from Twitter using a specific hashtag provided by the user
 
+Twits are fetched through Twitter Streaming API then passed to frontend from backend using Socket.io.  
+The app is built using Nodejs for server, jQuery for the frontend. Admin login password is managed by  Bcrypt for hashing and salting. If you would like to try this app locally please follow the procedures below:
+
 1.Make sure you have NodeJS installed on your machine.<br />2.Get Twitter API keys   
 {TWITTER_CONSUMER_KEY,   
  TWITTER_CONSUMER_SECRET,   
