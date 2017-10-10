@@ -36,6 +36,13 @@
       </div>
 
       <div class="flex-div">
+        <select class="form-control mb-3 w-50 text-center" id="logic-select">
+          <option value="AND">AND</option>
+          <option value="OR">OR</option>
+        </select>
+      </div>
+
+      <div class="flex-div">
         <select class="form-control mb-3 w-50 text-center" id="admin-filter-form-select">
           <option value="addNew">Add Parameter To Current Filter</option>
           <option value="delete">Delete Search Filter Parameter</option>
@@ -44,7 +51,7 @@
       </div>
 
         <div class="flex-div">
-          <form class="flex-div" id="admin-filter-form" action="/views/admin.html" method="post" formtype="addNew">
+          <form formtype="addNew" logic="AND" class="flex-div" id="admin-filter-form" action="/views/admin.html" method="post" >
             <div class="filter-input-field form-group w-50">
               <input class="admin-input form-control" list="delete-track-options" name="track" placeholder=" hashtag ">
               <datalist id="delete-track-options">

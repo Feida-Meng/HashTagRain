@@ -35,6 +35,10 @@ $('#admin-filter-form-select').change(function(){
 
 });
 
+$('#logic-select').change(function(){
+  $('#admin-filter-form').attr('logic', $('#logic-select').val());
+});
+
 //load current filter parameters for admin to choose for form with 'delete' formtype
 var addDeleteOptions = function() {
 
@@ -65,7 +69,7 @@ $('#admin-filter-form').on('submit', function(e) {
   }, {});
 
   //send input obj and formtype to server to update filter
-  socket.emit('adminFilterInput', [adminFilter, $('#admin-filter-form').attr('formtype')]);
+  socket.emit('adminFilterInput', [adminFilter, $('#admin-filter-form').attr('formtype'),$('#admin-filter-form').attr('logic')]);
   $('#admin-filter-form')[0].reset();
 
 });
