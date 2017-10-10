@@ -1,4 +1,22 @@
 
+*{
+  margin:0;
+}
+
+.container{
+  margin:auto 0;
+}
 input{
-   text-align:center;
+  text-align:center;
+}
+
+#twit-list{
+  with: 100%;
+}
+
+#stop-btn{
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  border-radius:50%
 }
