@@ -64,7 +64,7 @@ io.on('connection',(socket) => {
     updateCurrentFilterAtAmin();
   });
 
-  //-----Stop stopFetchingTwit when user click the stop button------
+  //-------stop Fetching Twit when user click the stop button------
   socket.on('stopFetchingTwit', () => {
     if (stream) {
       stream.stop();
