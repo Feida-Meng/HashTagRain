@@ -38,7 +38,7 @@ var T = new Twit({
   consumer_secret:      keys.TWITTER_CONSUMER_SECRET,
   access_token:         keys.TWITTER_Access_Token,
   access_token_secret:  keys.TWITTER_Access_Token_Secret,
-  timeout_ms:           60*1000  // optional HTTP request timeout to apply to all requests.
+  timeout_ms:           60*1000
 });
 
 //------------------init the filter for fetching twit ----------------------------
@@ -47,11 +47,12 @@ var filter = {};
 var stream;
 var currentUserHashtag = null;
 var filter_logic_or = false;
+var userId;
+var adminId;
 
 //---------------io listens on new socket connected on the client side ---------------------
 io.on('connection',(socket) => {
-  var userId;
-  var adminId;
+
 
   const updateCurrentFilterAtAmin = () => {
     io.to(adminId).emit('updateCurrentFilterAtAmin', rawFilter );
@@ -72,14 +73,34 @@ io.on('connection',(socket) => {
 
 
 
-  //Test if tweets match all filter parameters
-  const filter_logic = (tweets) => {
+  //Test if tweets match all filter parameters(AND)
+  const filter_logic = (tweet) => {
 
-    if (rawFilter.hashtag && rawFilter.hashtag.length > 0 && tweets.entities.hashtags.length > 0) {
+    //check for location match
+    if (rawFilter.location && rawFilter.location.length > 0 && tweet.user.location ) {
       var breaked = false;
-      for (let hi = 0; hi < tweets.entities.hashtags.length; hi ++) {
-        for (let hj = 0; hj < rawFilter.hashtag.length; hj++) {
-          if (rawFilter.hashtag[hj].toLowerCase() == `#${tweets.entities.hashtags[hi].toLowerCase()}` ) {
+      for (let j = 0; j < rawFilter.location.length; j++) {
+        if (tweet.user.location.toLowerCase().includes(rawFilter.location[j].toLowerCase())) {
+          breaked = true;
+          break;
+        }
+      }
+
+      if (!breaked) {
+        return false;
+      }
+    }
+
+    //check for hashtag match
+    if (rawFilter.track && rawFilter.track.length > 0) {
+      if (tweet.entities.hashtags.length === 0) {
+        return false;
+      }
+
+      var breaked = false;
+      for (let hi = 0; hi < tweet.entities.hashtags.length; hi ++) {
+        for (let hj = 0; hj < rawFilter.track.length; hj++) {
+          if (rawFilter.track[hj].toLowerCase() == `#${tweet.entities.hashtags[hi].text.toLowerCase()}` ) {
             breaked = true;
             break;
           }
@@ -90,10 +111,12 @@ io.on('connection',(socket) => {
       }
     }
 
-    if (rawFilter.follow && rawFilter.follow.length > 0 && tweets.user.screen_name != "" ) {
+
+    //check for screen_name match
+    if (rawFilter.follow && rawFilter.follow.length > 0 && tweet.user.screen_name ) {
       var breaked = false;
       for (let fj = 0; fj < rawFilter.follow.length; fj++) {
-        if (rawFilter.follow[j].toLowerCase() == `#${tweets.user.screen_name.toLowerCase()}` ) {
+        if (rawFilter.follow[fj].toLowerCase() == tweet.user.screen_name.toLowerCase()) {
           breaked = true;
           break;
         }
@@ -104,20 +127,6 @@ io.on('connection',(socket) => {
       }
     }
 
-    if (rawFilter.location && rawFilter.location.length > 0 && tweets.user.location != "" ) {
-      var breaked = false;
-      for (let j = 0; j < rawFilter.hashtags.length; j++) {
-        if (rawFilter.location[j].toLowerCase() == `#${tweets.entities.hashtags[i].toLowerCase()}` ) {
-          breaked = true;
-          break;
-        }
-      }
-
-      if (!breaked) {
-        return false;
-      }
-    }
-    console.log('pass');
     return true;
 
   }
@@ -138,10 +147,9 @@ io.on('connection',(socket) => {
       if (filter_logic_or) {
         // emit new tweet to front.
         io.to(userId).emit('newTwt',tweet);
-      } else if (filter_logic(tweet)) {
+      } else if (filter_logic(tweet)){
         io.to(userId).emit('newTwt',tweet);
       }
-
     });
 
     //stop the stream when the socket is disconnected
@@ -154,7 +162,6 @@ io.on('connection',(socket) => {
     }
 
   }
-
 
   // listen to filter changes made by admin
   socket.on('adminFilterInput', async (adminFilterInput) => {
@@ -177,7 +184,7 @@ io.on('connection',(socket) => {
     const filterInput = {...adminFilterInput[0]};
 
     if (filter_logic_or) {
-
+      // if filter logic is OR
       //-----if admin input username, convert it to twitter id for Streaming API to search--------------
       if (adminFilterInput[0].follow) {
         try {
@@ -298,7 +305,7 @@ io.on('connection',(socket) => {
       }
     }
    //---------------------------------------------------------------------------------------------------
-
+    console.log('rawFilter',rawFilter);
     updateCurrentFilterAtAmin();
 
     if (stream) {
