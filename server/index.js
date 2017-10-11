@@ -41,7 +41,7 @@ var T = new Twit({
   timeout_ms:           60*1000
 });
 
-//------------------init the filter for fetching twit ----------------------------
+
 var rawFilter = {};
 var filter = {};
 var stream;
