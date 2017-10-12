@@ -18,6 +18,6 @@ If you would like to try this app locally please follow the procedures below:
  TWITTER_Access_Token_Secret,  
  Admin_Login_Hash}  
  and put them in config/keys.js.  
-3.Run npm install.  
-4.Run npm start to start the app.  
-5.Check out the app in localhost:5000  
+3.Run `npm install`.  
+4.Run `npm start` to start the app.  
+5.Check out the app in `localhost:5000`.  
