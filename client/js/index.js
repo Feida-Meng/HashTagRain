@@ -41,7 +41,12 @@ $('#hashtag-form').on('submit', function(e) {
 
 //update current hashtag
 socket.on('currentUserHashtag', function(currentHashTag) {
-  $('#currentUserHashtag').html(currentHashTag);
+
+  if ($('#currentUserHashtag').length == 0) {
+    var hashTag = $('<p></p>').attr('id','currentUserHashtag').addClass('text-center text-primary');
+    $('#currentUserHashtagDiv').append(hashTag);
+  }
+  $('#currentUserHashtag').html("Current Hashtag: " + currentHashTag);
 });
 
 //Sumbit login password

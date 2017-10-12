@@ -152,7 +152,7 @@ io.on('connection',(socket) => {
       }
     });
 
-    //stop the stream when the socket is disconnected
+    //stop the stream when the socket(that is not for an admin user) is disconnected
     if (socket.id !== adminId) {
       socket.on('disconnect',() => {
         if (stream) {
@@ -309,6 +309,7 @@ io.on('connection',(socket) => {
     updateCurrentFilterAtAmin();
 
     if (stream) {
+      console.log(stream);
       fetchAndPostTwit();
     }
   });
