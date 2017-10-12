@@ -131,6 +131,7 @@ io.on('connection',(socket) => {
 
   }
 
+  //It is called whenever filter is updated or client click search
   const fetchAndPostTwit = () => {
 
     // stop current streaming (if there is one) to update the filter
@@ -152,7 +153,7 @@ io.on('connection',(socket) => {
       }
     });
 
-    //stop the stream when the socket is disconnected
+    //stop streaming when the user socket is disconnected
     if (socket.id !== adminId) {
       socket.on('disconnect',() => {
         if (stream) {
@@ -168,7 +169,7 @@ io.on('connection',(socket) => {
 
     // filter logic options (for now):
     //1. extract tweets if tweets propeties match all search parameters (i.e hashtag && location && username )
-    //2. extract tweets if tweets properties match any of the search parameters
+    //2. extract tweets if tweets properties match any of the search parameters, t
     if (adminFilterInput[2] === 'OR') {
       filter_logic_or = true;
     }
