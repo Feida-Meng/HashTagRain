@@ -1,6 +1,6 @@
 # HashTagRain, a social wall to display posts from Twitter using a specific hashtag provided by the user  
 
-Twits are fetched through twitter API `POST statuses/filter` in realtime. Fetched Twits are then passed to frontend from backend using Socket.io.The app is built using `Nodejs` for server, `jQuery` for the frontend. Admin login password is managed by  `Bcrypt` for hashing and salting.  
+Twits are fetched through twitter API `POST statuses/filter` in realtime. Fetched Twits are then passed to frontend from backend using `Socket.io`.The app is built using `Nodejs` for server, `jQuery` for the frontend. Admin login password is managed by  `Bcrypt` for hashing and salting.  
 
 `OR filter`  
 `POST statuses/filter` returns twits that match one or more filter predicates defined by admin for this app. Multiple parameters may be specified which allows most users to use a single connection to the Streaming API. The track, follow, and locations fields should be considered to be combined with an OR operator. e.g. `track=foo&follow=1234 returns Tweets matching “foo” OR created by user 1234`.  
