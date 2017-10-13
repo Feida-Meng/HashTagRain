@@ -14,7 +14,7 @@ input{
   with: 100%;
 }
 
-#stop-btn{
+#pause-btn{
   position: fixed;
   bottom: 12px;
   right: 12px;

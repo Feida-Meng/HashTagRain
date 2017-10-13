@@ -32,11 +32,14 @@ socket.on('newTwt',function(newTwt) {
 //search #hashtag
 $('#hashtag-form').on('submit', function(e) {
   e.preventDefault();
+  if ($('#pause-btn').text() === 'Continue') {
+    $('#pause-btn').text('Pause');
+    document.getElementById("pause-btn").className = "btn-danger text-light float-right";
+  }
   var hashtagInputBox = $('#hashtag-input');
   socket.emit('searchHashtag', hashtagInputBox.val());
   hashtagInputBox.val('');
-  $('.twit').remove();
-
+  // $('.twit').remove();
 });
 
 //update current hashtag
@@ -47,14 +50,29 @@ socket.on('currentUserHashtag', function(currentHashTag) {
     $('#currentUserHashtagDiv').append(hashTag);
   }
   $('#currentUserHashtag').html("Current Hashtag: " + currentHashTag);
+  $('.card').remove();
 });
 
 //Sumbit login password
-$('#login-submit').click(function(){
+$('#login-submit').click(function() {
   $( "#admin-login-form" ).submit();
 });
 
-//stop fetching twit
-$('#stop-btn').click(function(){
-  socket.emit("stopFetchingTwit");
+//show pause button
+socket.on('showPauseButton',function() {
+  console.log('show pause button');
+  $('#pause-btn').css('visibility', 'visible').text('Pause');
+  //$('#pause-btn').show();
+});
+
+//pause or restart fetching twit
+$('#pause-btn').click(function() {
+  socket.emit("pauseOrContinueFetching");
+  if ($(this).text() === 'Pause') {
+    $(this).text('Continue');
+    document.getElementById("pause-btn").className = "btn-success text-light float-right";
+  } else {
+    $(this).text('Pause');
+    document.getElementById("pause-btn").className = "btn-danger text-light float-right";
+  }
 });

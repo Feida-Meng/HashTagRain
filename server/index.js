@@ -41,7 +41,7 @@ var T = new Twit({
   timeout_ms:           60*1000
 });
 
-//------------------init the filter for fetching twit ----------------------------
+
 var rawFilter = {};
 var filter = {};
 var stream;
@@ -58,20 +58,18 @@ io.on('connection',(socket) => {
     io.to(adminId).emit('updateCurrentFilterAtAmin', rawFilter );
   }
 
-  //-------Display the current filter when admin login---------
-  socket.on('I-am-Admin',() => {
-    adminId = socket.id
-    updateCurrentFilterAtAmin();
-  });
-
-  //-----Stop stopFetchingTwit when user click the stop button------
-  socket.on('stopFetchingTwit', () => {
-    if (stream) {
-      stream.stop();
+  const streamOn = () => {
+    if (stream && stream.parser._events.element) {
+      // streaming is going
+      return 1;
+    } else if (stream){
+      // streaming stopped
+      return 2;
+    } else {
+      // user never searched any hashtag
+      return 3;
     }
-  });
-
-
+  };
 
   //Test if tweets match all filter parameters(AND)
   const filter_logic = (tweet) => {
@@ -111,7 +109,6 @@ io.on('connection',(socket) => {
       }
     }
 
-
     //check for screen_name match
     if (rawFilter.follow && rawFilter.follow.length > 0 && tweet.user.screen_name ) {
       var breaked = false;
@@ -131,15 +128,22 @@ io.on('connection',(socket) => {
 
   }
 
+  //It is called whenever filter is updated or client click search
   const fetchAndPostTwit = () => {
 
     // stop current streaming (if there is one) to update the filter
-    if (stream) {
+    if (streamOn() === 1) {
       stream.stop();
     }
 
+    io.to(userId).emit('showPauseButton');
+
+
     //start a streaming with a filter
     stream = T.stream('statuses/filter', filter);
+
+    //turn on the pause button
+
 
     //listen on new tweet
     stream.on('tweet', (tweet) => {
@@ -155,7 +159,7 @@ io.on('connection',(socket) => {
     //stop the stream when the socket(that is not for an admin user) is disconnected
     if (socket.id !== adminId) {
       socket.on('disconnect',() => {
-        if (stream) {
+        if (streamOn() === 1) {
           stream.stop();
         }
       });
@@ -163,12 +167,33 @@ io.on('connection',(socket) => {
 
   }
 
+  //-------Display the current filter when admin login---------
+  socket.on('I-am-Admin',() => {
+    adminId = socket.id
+    updateCurrentFilterAtAmin();
+  });
+
+  //  //-------pause or continue fetching Twit when user click the stop button------
+    socket.on('pauseOrContinueFetching', () => {
+
+      switch (streamOn()) {
+        case 1:
+          console.log('going to stop');
+          stream.stop();
+          break;
+        case 2:
+          console.log('going to start');
+          stream.start();
+          break;
+      }
+    });
+
   // listen to filter changes made by admin
   socket.on('adminFilterInput', async (adminFilterInput) => {
 
     // filter logic options (for now):
     //1. extract tweets if tweets propeties match all search parameters (i.e hashtag && location && username )
-    //2. extract tweets if tweets properties match any of the search parameters
+    //2. extract tweets if tweets properties match any of the search parameters, t
     if (adminFilterInput[2] === 'OR') {
       filter_logic_or = true;
     }
@@ -308,8 +333,7 @@ io.on('connection',(socket) => {
     console.log('rawFilter',rawFilter);
     updateCurrentFilterAtAmin();
 
-    if (stream) {
-      console.log(stream);
+    if (streamOn() === 1) {
       fetchAndPostTwit();
     }
   });
