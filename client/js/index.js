@@ -32,6 +32,9 @@ socket.on('newTwt',function(newTwt) {
 //search #hashtag
 $('#hashtag-form').on('submit', function(e) {
   e.preventDefault();
+
+  //show pause button
+  $('#pause-btn').css('visibility', 'visible').text('Pause');
   if ($('#pause-btn').text() === 'Continue') {
     $('#pause-btn').text('Pause');
     document.getElementById("pause-btn").className = "btn-danger text-light float-right";
@@ -58,21 +61,17 @@ $('#login-submit').click(function() {
   $( "#admin-login-form" ).submit();
 });
 
-//show pause button
-socket.on('showPauseButton',function() {
-  console.log('show pause button');
-  $('#pause-btn').css('visibility', 'visible').text('Pause');
-  //$('#pause-btn').show();
-});
-
 //pause or restart fetching twit
 $('#pause-btn').click(function() {
-  socket.emit("pauseOrContinueFetching");
+  var btnFunction;
   if ($(this).text() === 'Pause') {
+    stopFetch = true;
     $(this).text('Continue');
     document.getElementById("pause-btn").className = "btn-success text-light float-right";
   } else {
     $(this).text('Pause');
+    stopFetch = false;
     document.getElementById("pause-btn").className = "btn-danger text-light float-right";
   }
+  socket.emit("pauseOrContinueFetching",(stopFetch));
 });
