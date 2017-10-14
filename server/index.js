@@ -7,7 +7,7 @@ const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 
 var { loginCheck } = require('../middleware/login');
-
+const { streamOn, filter_logic } = require('./methods');
 const publicPath = path.join(__dirname, '../client/');
 const PORT = process.env.PORT || 5000;
 
@@ -53,86 +53,15 @@ var adminId;
 //---------------io listens on new socket connected on the client side ---------------------
 io.on('connection',(socket) => {
 
-
   const updateCurrentFilterAtAmin = () => {
     io.to(adminId).emit('updateCurrentFilterAtAmin', rawFilter );
-  }
-
-  const streamOn = () => {
-    if (stream && stream.parser._events.element) {
-      // streaming is going
-      return 1;
-    } else if (stream){
-      // streaming stopped
-      return 2;
-    } else {
-      // user never searched any hashtag
-      return 3;
-    }
-  };
-
-  //Test if tweets match all filter parameters(AND)
-  const filter_logic = (tweet) => {
-
-    //check for location match
-    if (rawFilter.location && rawFilter.location.length > 0 && tweet.user.location ) {
-      var breaked = false;
-      for (let j = 0; j < rawFilter.location.length; j++) {
-        if (tweet.user.location.toLowerCase().includes(rawFilter.location[j].toLowerCase())) {
-          breaked = true;
-          break;
-        }
-      }
-
-      if (!breaked) {
-        return false;
-      }
-    }
-
-    //check for hashtag match
-    if (rawFilter.track && rawFilter.track.length > 0) {
-      if (tweet.entities.hashtags.length === 0) {
-        return false;
-      }
-
-      var breaked = false;
-      for (let hi = 0; hi < tweet.entities.hashtags.length; hi ++) {
-        for (let hj = 0; hj < rawFilter.track.length; hj++) {
-          if (rawFilter.track[hj].toLowerCase() == `#${tweet.entities.hashtags[hi].text.toLowerCase()}` ) {
-            breaked = true;
-            break;
-          }
-        }
-      }
-      if (!breaked) {
-        return false;
-      }
-    }
-
-    //check for screen_name match
-    if (rawFilter.follow && rawFilter.follow.length > 0 && tweet.user.screen_name ) {
-      var breaked = false;
-      for (let fj = 0; fj < rawFilter.follow.length; fj++) {
-        if (rawFilter.follow[fj].toLowerCase() == tweet.user.screen_name.toLowerCase()) {
-          breaked = true;
-          break;
-        }
-      }
-
-      if (!breaked) {
-        return false;
-      }
-    }
-
-    return true;
-
   }
 
   //It is called whenever filter is updated or client click search
   const fetchAndPostTwit = () => {
 
     // stop current streaming (if there is one) to update the filter
-    if (streamOn() === 1) {
+    if (streamOn(stream) === 1) {
       stream.stop();
     }
 
@@ -151,7 +80,7 @@ io.on('connection',(socket) => {
       if (filter_logic_or) {
         // emit new tweet to front.
         io.to(userId).emit('newTwt',tweet);
-      } else if (filter_logic(tweet)){
+      } else if (filter_logic(tweet,rawFilter)){
         io.to(userId).emit('newTwt',tweet);
       }
     });
@@ -159,7 +88,7 @@ io.on('connection',(socket) => {
     //stop the stream when the socket(that is not for an admin user) is disconnected
     if (socket.id !== adminId) {
       socket.on('disconnect',() => {
-        if (streamOn() === 1) {
+        if (streamOn(stream) === 1) {
           stream.stop();
         }
       });
@@ -176,7 +105,7 @@ io.on('connection',(socket) => {
   //  //-------pause or continue fetching Twit when user click the stop button------
     socket.on('pauseOrContinueFetching', () => {
 
-      switch (streamOn()) {
+      switch (streamOn(stream)) {
         case 1:
           console.log('going to stop');
           stream.stop();
@@ -333,11 +262,10 @@ io.on('connection',(socket) => {
     console.log('rawFilter',rawFilter);
     updateCurrentFilterAtAmin();
 
-    if (streamOn() === 1) {
+    if (streamOn(stream) === 1) {
       fetchAndPostTwit();
     }
   });
-
 
 //-----------It listens the event that user submits the hashtag----------------------------
   socket.on('searchHashtag', (newHashtag) => {
