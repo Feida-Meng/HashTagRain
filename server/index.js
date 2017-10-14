@@ -6,8 +6,8 @@ const Twit = require('twit');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 
-var { loginCheck } = require('../middleware/login');
-const { streamOn, filter_logic } = require('./methods');
+const { loginCheck } = require('../middleware/login');
+const { streamOn, filter_logic, myTweet } = require('./methods');
 const publicPath = path.join(__dirname, '../client/');
 const PORT = process.env.PORT || 5000;
 
@@ -33,7 +33,7 @@ app.get('/',(req,res) => {
 
 
 //---------------------setting up keys to use twitter api-------------------------------
-var T = new Twit({
+let T = new Twit({
   consumer_key:         keys.TWITTER_CONSUMER_KEY,
   consumer_secret:      keys.TWITTER_CONSUMER_SECRET,
   access_token:         keys.TWITTER_Access_Token,
@@ -45,11 +45,10 @@ var T = new Twit({
 const rawFilter = {};
 const filter = {};
 const userList = {};
-var stream;
-var currentUserHashtag = null;
+let stream;
+let currentUserHashtag = null;
 const filter_logic_or = false;
-const userId;
-const adminId;
+let adminId;
 
 //---------------io listens on new socket connected on the client side ---------------------
 io.on('connection',(socket) => {
@@ -66,7 +65,7 @@ io.on('connection',(socket) => {
       stream.stop();
     }
 
-    io.to(userId).emit('showPauseButton');
+    //io.to(userId).emit('showPauseButton');
 
     //start a streaming with a filter
     stream = T.stream('statuses/filter', filter);
@@ -74,11 +73,14 @@ io.on('connection',(socket) => {
     //listen on new tweet
     stream.on('tweet', (tweet) => {
 
-      if (filter_logic_or) {
-        // emit new tweet to front.
-        io.to(userId).emit('newTwt',tweet);
-      } else if (filter_logic(tweet,rawFilter)){
-        io.to(userId).emit('newTwt',tweet);
+      for (let userId in userList) {
+        if (myTweet(tweet, userId, userList)) {
+          if (filter_logic_or) {
+            io.to(userId).emit('newTwt',tweet);
+          } else if (filter_logic(tweet, rawFilter)) {
+            io.to(userId).emit('newTwt',tweet);
+          }
+        }
       }
     });
 
@@ -265,21 +267,22 @@ io.on('connection',(socket) => {
 
 //-----------It listens the event that user submits the hashtag----------------------------
   socket.on('searchHashtag', (newHashtag) => {
-    userId = socket.id;
-    //Sanitize the user input
-    newHashtag = newHashtag.trim();
-    newHashtag = newHashtag.charAt(0) === '#' ? newHashtag : `#${newHashtag}`;
 
-    //update the filter, user other than admin cannot add the location and username
-    //therefore, hashtag can be saved to filter directly
-    if (currentUserHashtag) {
-      filter.track[filter.track.indexOf(currentUserHashtag)] = newHashtag;
-    } else {
-      filter['track'] ? filter['track'].push(newHashtag) : filter['track'] = [newHashtag];
-    }
-    currentUserHashtag = newHashtag;
-    socket.emit('currentUserHashtag', currentUserHashtag);
-    fetchAndPostTwit();
+  //Sanitize the user input
+  newHashtag = newHashtag.trim();
+  newHashtag = newHashtag.charAt(0) === '#' ? newHashtag : `#${newHashtag}`;
+
+  //update the filter, user other than admin cannot add the location and username
+  //therefore, hashtag can be saved to filter directly
+  if (userList[socket.id]) {
+    filter.track[filter.track.indexOf(userList[socket.id])] = newHashtag;
+  } else {
+    filter['track'] ? filter['track'].push(newHashtag) : filter['track'] = [newHashtag];
+  }
+  userList[socket.id] = newHashtag;
+  console.log('filter',filter);
+  socket.emit('currentUserHashtag', newHashtag);
+  fetchAndPostTwit();
   });
 
 });
