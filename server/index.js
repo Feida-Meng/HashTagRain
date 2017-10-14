@@ -7,7 +7,7 @@ const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
 
 const { loginCheck } = require('../middleware/login');
-const { streamOn, filter_logic, myTweet } = require('./methods');
+const { streamOn, filter_logic, myTweet, isEmpty } = require('./methods');
 const publicPath = path.join(__dirname, '../client/');
 const PORT = process.env.PORT || 5000;
 
@@ -64,15 +64,13 @@ io.on('connection',(socket) => {
     if (streamOn(stream) === 1) {
       stream.stop();
     }
-
     //io.to(userId).emit('showPauseButton');
-
     //start a streaming with a filter
     stream = T.stream('statuses/filter', filter);
 
     //listen on new tweet
     stream.on('tweet', (tweet) => {
-
+      //distribute the tweet with certain hashtag to the corresponding user
       for (let userId in userList) {
         if (myTweet(tweet, userId, userList)) {
           if (filter_logic_or) {
@@ -83,16 +81,25 @@ io.on('connection',(socket) => {
         }
       }
     });
-
-    //stop the stream when the socket(that is not for an admin user) is disconnected
-    if (socket.id !== adminId) {
-      socket.on('disconnect',() => {
-        if (streamOn(stream) === 1) {
-          stream.stop();
-        }
-      });
-    }
   }
+
+  //when user(not includes admin) left the app
+  //remove the hashtag from current user if the user has searched any
+  //then if there is any other user is searching hashtag, restart
+  //the stream with updated filter
+  socket.on('disconnect',() => {
+    console.log('filter',filter);
+    if (socket.id !== adminId && userList[socket.id] && streamOn(stream) === 1 && filter.track) {
+      filter.track = filter.track.filter(elem => elem != userList[socket.id]);
+      if (!isEmpty(userList)) {
+        console.log('filter',filter);
+        fetchAndPostTwit();
+      } else {
+        console.log('filter',filter);
+        stream.stop();
+      }
+    }
+  });
 
   //-------Display the current filter when admin login---------
   socket.on('I-am-Admin',() => {

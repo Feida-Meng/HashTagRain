@@ -76,4 +76,13 @@ const myTweet = (tweet, userId, userList) => {
   return false;
 };
 
-module.exports = { streamOn, filter_logic, myTweet };
+const isEmpty = (obj) => {
+  for(var prop in obj) {
+    if(obj.hasOwnProperty(prop)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+module.exports = { streamOn, filter_logic, myTweet, isEmpty };
