@@ -42,13 +42,14 @@ var T = new Twit({
 });
 
 
-var rawFilter = {};
-var filter = {};
+const rawFilter = {};
+const filter = {};
+const userList = {};
 var stream;
 var currentUserHashtag = null;
-var filter_logic_or = false;
-var userId;
-var adminId;
+const filter_logic_or = false;
+const userId;
+const adminId;
 
 //---------------io listens on new socket connected on the client side ---------------------
 io.on('connection',(socket) => {
@@ -67,12 +68,8 @@ io.on('connection',(socket) => {
 
     io.to(userId).emit('showPauseButton');
 
-
     //start a streaming with a filter
     stream = T.stream('statuses/filter', filter);
-
-    //turn on the pause button
-
 
     //listen on new tweet
     stream.on('tweet', (tweet) => {
@@ -93,7 +90,6 @@ io.on('connection',(socket) => {
         }
       });
     }
-
   }
 
   //-------Display the current filter when admin login---------
@@ -102,7 +98,7 @@ io.on('connection',(socket) => {
     updateCurrentFilterAtAmin();
   });
 
-  //  //-------pause or continue fetching Twit when user click the stop button------
+    //-------pause or continue fetching Twit when user click the stop button------
     socket.on('pauseOrContinueFetching', () => {
 
       switch (streamOn(stream)) {

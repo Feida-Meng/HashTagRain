@@ -65,4 +65,15 @@ const filter_logic = (tweet, rawFilter) => {
   return true;
 };
 
-module.exports = { streamOn, filter_logic };
+//descide if a tweet belong to a user
+//check if the tweeter contain the hashtags user is looking for
+const myTweet = (tweet, userId, userList) => {
+  for (let i = 0; i < tweet.entities.hashtags.length; i++) {
+    if (`#${tweet.entities.hashtags[i].text.toLowerCase()}` === userList[userId].toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+};
+
+module.exports = { streamOn, filter_logic, myTweet };
