@@ -32,11 +32,11 @@ $('#hashtag-form').on('submit', function(e) {
   e.preventDefault();
 
   //show pause button
+  socket.emit("pauseOrContinueFetching",false);
   $('#pause-btn').css('visibility', 'visible').text('Pause');
-  if ($('#pause-btn').text() === 'Continue') {
-    $('#pause-btn').text('Pause');
-    document.getElementById("pause-btn").className = "btn-danger text-light float-right";
-  }
+  $('#pause-btn').text('Pause');
+  $('#pause-btn').removeClass().addClass("btn-danger text-light float-right");
+
   var hashtagInputBox = $('#hashtag-input');
   socket.emit('searchHashtag', hashtagInputBox.val());
   hashtagInputBox.val('');
@@ -65,11 +65,11 @@ $('#pause-btn').click(function() {
   if ($(this).text() === 'Pause') {
     stopFetch = true;
     $(this).text('Continue');
-    document.getElementById("pause-btn").className = "btn-success text-light float-right";
+    $(this).removeClass().addClass("btn-success text-light float-right");
   } else {
     $(this).text('Pause');
     stopFetch = false;
-    document.getElementById("pause-btn").className = "btn-danger text-light float-right";
+    $(this).removeClass().addClass("btn-danger text-light float-right");
   }
-  socket.emit("pauseOrContinueFetching",(stopFetch));
+  socket.emit("pauseOrContinueFetching",stopFetch);
 });

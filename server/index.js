@@ -76,6 +76,7 @@ io.on('connection',(socket) => {
     //listen on new tweet
     stream.on('tweet', (tweet) => {
       // emit new tweet to front.
+      console.log('tweet');
       socket.on('pauseOrContinueFetching', (stopFetch) => {
         pause[socket.id] = stopFetch;
       });
