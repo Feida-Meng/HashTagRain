@@ -8,7 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
-    <title> hashwa11-Admin </title>
+    <title> Hashtag Rain-Admin </title>
   </head>
 
   <body>
@@ -26,53 +26,30 @@
         <h1> Hashtag Filter Settings</h1>
       </div>
 
-      <div class="flex-div text-center">
-        <div class="currentFilter">
-          <h4 id='filter-title'> </h4>
-          <p id='hashtag-filter'> </p>
-          <p id='location-filter'> </p>
-          <p id='username-filter'> </p>
+      <div class="flex-div">
+        <div class="d-inline-block text-center">
+          <p>Please Select Search Logic</p>
+          <select class="form-control mb-3 text-center" id="logic-select">
+            <option class="text-center" value="AND">AND, Match All Search Parameters</option>
+            <option value="OR"> OR, Match One Of The Search Parameters</option>
+          </select>
         </div>
       </div>
 
       <div class="flex-div">
-        <p>Please Select Search Logic</p>
-        <select class="form-control mb-3 w-50 text-center" id="logic-select">
-          <option value="AND">AND, Match All Search Parameters</option>
-          <option value="OR"> OR, Match One Of The Search Parameters</option>
-        </select>
+          <div class="filter-input-field form-group d-block">
+            <label for="hashtag-input"> Hashtag:  </label>
+            <input id="hashtag-input" class="admin-input w-50 ml-1 form-control d-inline-block" name="track" placeholder="Enter hashtag ">
+          </div>
+          <div class="filter-input-field form-group d-block">
+            <label for="location-input"> location:  </label>
+            <input id="location-input" class="admin-input w-50 ml-1 form-control d-inline-block" name="location" placeholder="Enter location " >
+          </div>
+          <div class="filter-input-field form-group d-block">
+            <label for="username-input"> User name: </label>
+            <input id="username-input" class="admin-input w-50 ml-1 form-control d-inline-block" name="follow" placeholder=" Enter user name " >
+          </div>
       </div>
-
-      <div class="flex-div">
-        <select class="form-control mb-3 w-50 text-center" id="admin-filter-form-select">
-          <option value="addNew">Add Parameter To Current Filter</option>
-          <option value="delete">Delete Search Filter Parameter</option>
-          <option value="overwrite">Overwrite Current Search Filter </option>
-        </select>
-      </div>
-
-        <div class="flex-div">
-          <form formtype="addNew" logic="AND" class="flex-div" id="admin-filter-form" action="/views/admin.html" method="post" >
-            <div class="filter-input-field form-group w-50">
-              <input class="admin-input form-control" list="delete-track-options" name="track" placeholder=" hashtag ">
-              <datalist id="delete-track-options">
-              </datalist>
-            </div>
-            <div class="filter-input-field form-group w-50">
-              <input class="admin-input form-control" list="delete-location-options" name="location" placeholder=" location " >
-              <datalist id="delete-location-options">
-              </datalist>
-            </div>
-            <div class="filter-input-field form-group w-50">
-              <input class="admin-input form-control" list="delete-follow-options" name="follow" placeholder=" user name " >
-              <datalist id="delete-follow-options">
-              </datalist>
-            </div>
-            <div>
-              <button class="btn submit"> Save </button>
-            </div>
-          </form>
-        </div>
 
 
     <script src="/socket.io/socket.io.js"></script>

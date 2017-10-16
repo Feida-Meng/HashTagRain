@@ -3,7 +3,7 @@ var socket = io();
 //add new twit
 socket.on('newTwt',function(newTwt) {
 
-  console.log(newTwt);
+  //console.log(newTwt);
   var width = $(window).width()
   if (width <= 576) {
     max_twit = 3;
@@ -24,9 +24,7 @@ socket.on('newTwt',function(newTwt) {
   if ( $(`.card`).length === max_twit ) {
     $('.card').last().remove();
   }
-
   $('#twit-list').prepend(card);
-
 });
 
 //search #hashtag
