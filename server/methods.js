@@ -1,5 +1,7 @@
 const streamOn = (stream) => {
-  if (stream && stream.parser._events.element) {
+
+  //console.log('stream._events:',stream._events);
+  if (stream && !isEmpty(stream._events)) {
     // streaming is going
     return 1;
   } else if (stream){
@@ -11,7 +13,7 @@ const streamOn = (stream) => {
   }
 };
 
-const filter_logic = (tweet, rawFilter) => {
+const filterLogicAnd = (tweet, rawFilter) => {
 
   //check for location match
   if (rawFilter.location && rawFilter.location.length > 0 && tweet.user.location ) {
@@ -37,7 +39,9 @@ const filter_logic = (tweet, rawFilter) => {
     var breaked = false;
     for (let hi = 0; hi < tweet.entities.hashtags.length; hi ++) {
       for (let hj = 0; hj < rawFilter.track.length; hj++) {
+        //console.log(`hashtags: /${tweet.entities.hashtags[hi].text.toLowerCase()}/ V.S. rawFilter: /${rawFilter.track}/`);
         if (rawFilter.track[hj].toLowerCase() == `#${tweet.entities.hashtags[hi].text.toLowerCase()}` ) {
+
           breaked = true;
           break;
         }
@@ -77,12 +81,12 @@ const myTweet = (tweet, userId, userList) => {
 };
 
 const isEmpty = (obj) => {
+
   for(var prop in obj) {
-    if(obj.hasOwnProperty(prop)) {
-      return false;
-    }
+    console.log('not empty');
+    return false;
   }
   return true;
 };
 
-module.exports = { streamOn, filter_logic, myTweet, isEmpty };
+module.exports = { streamOn, filterLogicAnd, myTweet, isEmpty };

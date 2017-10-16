@@ -34,3 +34,5 @@ input{
   margin: 0;
   justify-content: center;
 }
+
+.deleteTag { cursor: pointer; }
